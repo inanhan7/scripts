@@ -8,7 +8,7 @@ cpunum=`cat /proc/cpuinfo| grep "processor"| wc -l`
 
 nginxmod=`echo $4`
 
-nginxV='1.15.5';phpV='7.2.13'
+nginxV='1.14.2';phpV='7.2.16'
 if [ -z $2 ];then echo -e "Default version:\n\tnginx:${nginxV}\n\tphp:${phpV}";else nginxV="$2";phpV="$2";fi
 
 nginxconfdir='/etc/nginx'
@@ -17,12 +17,12 @@ phpconfdir='/etc/php'
 if `ls /usr/sbin/nginx &> /dev/null`;then nginxnow=`nginx -v 2>&1 | grep -Po "(?<=nginx version\: nginx\/)[0-9\.]+"`;fi
 if `ls /usr/bin/php &> /dev/null`;then phpnow=`php -v | grep -Po "(?<=PHP )[0-9\.]+"`;fi
 
-nginxurl="https://code.aliyun.com/letwen/Source-package-upload-plan/raw/master/nginx-Source-Package/nginx-${nginxV}.tar.gz"
-phpurl="https://code.aliyun.com/letwen/Source-package-upload-plan/raw/master/php-Source-Package/php-${phpV}.tar.gz"
+nginxurl="https://code.aliyun.com/letwen/scripts/raw/master/Source_Package/nginx-${nginxV}.tar.gz"
+phpurl="https://code.aliyun.com/letwen/scripts/raw/master/Source_Package/php-${phpV}.tar.gz"
 if [ -z $3 ];then echo "The default download source is alicode repository";else 
 	if [[ $3 == 'g' ]];then
-		nginxurl="https://github.com/letwen/Source-package-upload-plan/raw/master/nginx-Source-Package/nginx-${nginxV}.tar.gz"
-		phpurl="https://github.com/letwen/Source-package-upload-plan/raw/master/php-Source-Package/php-${phpV}.tar.gz"
+		nginxurl="https://github.com/letwen/scripts/raw/master/Source_Package/nginx-${nginxV}.tar.gz"
+		phpurl="https://github.com/letwen/scripts/raw/master/Source_Package/php-${phpV}.tar.gz"
 	else echo "Wrong input";fi
 fi
 
@@ -75,7 +75,7 @@ fi
 yum install wget curl git screen gcc-c++ -y;testconf
 
 function userc() {
-	if `cat /etc/passwd | grep ${webuser} &> /dev/null`;then echo "Web user already exists";else useradd -s /sbin/nologin ${webuser};fi
+	if `cat /etc/passwd | grep ${webuser} &> /dev/null`;then echo "Web user already exists";else useradd ${webuser};fi
 }
 
 function nginx() {
@@ -200,7 +200,7 @@ function bbr() {
 softlist='nginx php bbr'
 
 if [[ $1 == '-h' ]];then
-	echo '$1 enter the operation to be done nginx/php/kerup/bbr, $2 enter the version number you want to install, the version number is only for nginx and php, if you do not enter the version number will be defined according to the value in the script, if you want to customize the installation Directory, please change in the script name variable containing dir, $3 can input g to convert to github repository download source, also only for nginx and php'
+	echo '$1 enter the operation to be done nginx/php/kerup/bbr, $2 Define the installation version, the default version is nginx1.14.2, php7.2.16. It is not recommended to change the default value. If necessary, please fill in 1.14.2 and 7.2.16. If you want to change the default value, please check if the warehouse has your input. version. if you want to customize the installation Directory, please change in the script name variable containing dir, $3 can input g to convert to github repository download source, also only for nginx and php'
 	elif [[ $1 == 'nginx' ]] || [[ $1 == 'php' ]] || [[ $1 == 'kerup' ]] || [[ $1 == 'bbr' ]];then $1;else
 	echo "Wrong input"
 fi
