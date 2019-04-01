@@ -13,3 +13,6 @@
 		grub2-set-default 最新版本的位置（注意从0开始）
 	对于快速安装nginx添加了一个模块，用于快速安装ldap模块（需要先安装配置好ldap）
 		install_nginx_php_bbr.sh nginx 版本号 g ldap
+
+   ddos_install.sh
+	快速安装开源ddos防火墙项目，使用ddos_installddos_install.sh install来安装

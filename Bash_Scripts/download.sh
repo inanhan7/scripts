@@ -164,7 +164,7 @@ I went to learn python, this script is no longer maintained.
 	
 Contact Me:
 	Email : admin@prcplayer.com
-	Web Site : prcplayer.com
+	Blog : prcplayer.com rhel.ink loger.ink
 "
 	esac
 		exit 0
