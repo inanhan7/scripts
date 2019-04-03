@@ -28,6 +28,9 @@ elif [[ ${host} == 'help' ]];then
 	yum：yum配置
 		格式:control host yum {install|uninstall|update|upgrade} [pkgname]
 		只有当指定{install|uninstall}时需要指定报名，每次至多可以输入5个包名
+
+	hostanme：配置主机名
+		格式：control hostname 主机名
 '
 else
 	echo "配置文件中没有找到相应的主机"
@@ -91,6 +94,11 @@ function udp() {
 ${pre} netstat -nupl
 }
 
+function Hostname() {
+Htn=$1
+${pre} hostnamectl set-hostname ${Htn}
+}
+
 case ${doinfo} in
 	"ssrconfig")
 		ssrconfig	
@@ -112,6 +120,9 @@ case ${doinfo} in
 		;;
 	"yum")
 		yum $3 $4 $5 $6 $7 $8
+		;;
+	"hostname")
+		Hostname $3
 		;;
 	esac
 		echo "blog : prcplayer.com  rhel.ink  loger.ink"
