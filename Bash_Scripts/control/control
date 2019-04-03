@@ -93,9 +93,9 @@ ${pre} netstat -nupl
 
 case ${doinfo} in
 	"ssrconfig")
-		check
+		ssrconfig	
 		;;
-	"run")
+	"ssrrun")
 		ssrrun
 		;;
 	"login")
