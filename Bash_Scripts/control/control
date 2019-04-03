@@ -1,0 +1,117 @@
+#!/bin/bash
+host=$1
+doinfo=$2
+path=`dirname $0`
+
+if `cat ${path}/host | grep -Po "[ ]${host}[ ]" >> /tmp/control.log`;then
+	chmod 700 ${path}/key
+	chmod 600 ${path}/key/*
+	chown root.root ${path}/key -R
+	Port=`cat ${path}/host | grep ${host} | awk 'FS=" "{print $3}'`
+	Host=`cat ${path}/host | grep ${host} | awk 'FS=" "{print $2}'`
+	Key="${path}/key/${host}"
+	pre="ssh -p ${Port} -i ${Key} ${Host}"
+elif [[ ${host} == 'help' ]];then
+	echo '命令格式：control {host|help} {command} ......
+命令列表
+	ssrconfig：检查ssr配置文件
+
+	ssrrun：重新启动ssr
+
+	firewalld：配置firewalld防火墙
+		格式：control host firewalld {list|add|remove|stop|start|reload} [service|port/{tcp/udp}]
+
+	tcp：查看开启的tcp端口
+
+	udp：查看开启的udp端口
+
+	yum：yum配置
+		格式:control host yum {install|uninstall|update|upgrade} [pkgname]
+		只有当指定{install|uninstall}时需要指定报名，每次至多可以输入5个包名
+'
+else
+	echo "配置文件中没有找到相应的主机"
+fi
+
+function ssrconfig() {
+${pre} cat /etc/shadowsocks.json
+}
+
+function yum() {
+Command=$1
+Pkg="$2 $3 $4 $5 $6"
+if [[ ${Command} == 'install' ]] || [[ ${Command} == 'uninstall' ]] || [[ ${Command} == 'update' ]] || [[ ${Command} == 'upgrade' ]];then
+${pre} yum ${Command} ${Pkg} -y
+else echo "输入错误";fi
+}
+
+function ssrrun() {
+${pre} /etc/init.d/shadowsocks restart
+}
+
+function login() {
+${pre}
+}
+
+function firewalld() {
+Fcmd=$1
+Ftype=$2
+Faims=$3
+if [[ ${Fcmd} == 'list' ]];then
+	${pre} firewall-cmd --list-all
+elif [[ ${Fcmd} == 'add' ]];then
+	if [[ ${Ftype} == 'port' ]];then
+		${pre} firewall-cmd --permanent --add-port=${Faims}
+	elif [[ ${Ftype} == 'service' ]];then
+		${pre} firewall-cmd --permanent --add-service=${Faims}
+	else echo "错误的语句"
+	fi
+elif [[ ${Fcmd} == 'remove' ]];then
+        if [[ ${Ftype} == 'port' ]];then
+                ${pre} firewall-cmd --permanent --remove-port=${Faims}
+        elif [[ ${Ftype} == 'service' ]];then
+                ${pre} firewall-cmd --permanent --remove-service=${Faims}
+        else echo "错误的语句"
+        fi
+elif [[ ${Fcmd} == 'stop' ]];then
+	${pre} systemctl stop firewalld
+elif [[ ${Fcmd} == 'start' ]];then
+	${pre} systemctl start firewalld
+elif [[ ${Fcmd} == 'reload' ]];then
+	${pre} firewall-cmd --reload
+else echo "错误的语句"
+fi
+}
+
+function tcp() {
+${pre} netstat -ntpl
+}
+
+function udp() {
+${pre} netstat -nupl
+}
+
+case ${doinfo} in
+	"ssrconfig")
+		check
+		;;
+	"run")
+		ssrrun
+		;;
+	"login")
+		login
+		;;
+	"firewalld")
+		firewalld $3 $4 $5
+		;;
+	"tcp")
+		tcp
+		;;
+	"udp")
+		udp
+		;;
+	"yum")
+		yum $3 $4 $5 $6 $7 $8
+		;;
+	esac
+		echo "blog : prcplayer.com  rhel.ink  loger.ink"

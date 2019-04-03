@@ -67,12 +67,14 @@ if [[ $? != 0 ]];then echo "Error in execution, please check the error message" 
 }
 
 #Installation dependency
-if `rpm -qa | grep epel &> /dev/null`;then echo "Epel extension source is installed";else
-	rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm;testconf
-	yum clean all && yum makecache fast;testconf
-fi
+function ready() {
+	if `rpm -qa | grep epel &> /dev/null`;then echo "Epel extension source is installed";else
+		rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm;testconf
+		yum clean all && yum makecache fast;testconf
+	fi
 
-yum install wget curl git screen gcc-c++ -y;testconf
+	yum install wget curl git screen gcc-c++ -y;testconf
+}
 
 function userc() {
 	if `cat /etc/passwd | grep ${webuser} &> /dev/null`;then echo "Web user already exists";else useradd ${webuser};fi
@@ -164,28 +166,12 @@ etc path:/etc/php"
 }
 
 function kerup() {
-#View current kernel version
-	kernelV=`uname -r | grep -Po "[1-9.]+(?=\-)"`
 #Install the new  kernel
 	if `rpm -qa | grep elrepo-release &> /dev/null`;then echo "Elrepo-release yum source installed";else
 	rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org;testconf
 	rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm;testconf
 	fi
 	yum --enablerepo=elrepo-kernel install kernel-ml -y;testconf
-#View the newly installed kernel version
-	kernelNV=`rpm -qa | grep -Po "(?<=kernel\-ml\-)[1-9\.]+(?=\-)"`
-#Comparative version
-	if [[ ${kernelV} < ${kernelNV} ]];then
-		#Update kernel
-		i=0
-		for a in `egrep ^menuentry /etc/grub2.cfg | cut -f 2 -d \'`;do
-			 if `echo $a | grep "${kernelNV}" &> /dev/null`;then kernelNVP="${i}";grub2-set-default ${kernelNVP};testconf;fi
-			 ((i++))
-		done
-		echo "The latest version of the kernel installation is complete and may require a reboot to complete the installation."
-	else
-		echo "Already the latest kernel"
-	fi
 }
 
 function bbr() {
@@ -200,7 +186,20 @@ function bbr() {
 softlist='nginx php bbr'
 
 if [[ $1 == '-h' ]];then
-	echo '$1 enter the operation to be done nginx/php/kerup/bbr, $2 Define the installation version, the default version is nginx1.14.2, php7.2.16. It is not recommended to change the default value. If necessary, please fill in 1.14.2 and 7.2.16. If you want to change the default value, please check if the warehouse has your input. version. if you want to customize the installation Directory, please change in the script name variable containing dir, $3 can input g to convert to github repository download source, also only for nginx and php'
-	elif [[ $1 == 'nginx' ]] || [[ $1 == 'php' ]] || [[ $1 == 'kerup' ]] || [[ $1 == 'bbr' ]];then $1;else
-	echo "Wrong input"
+	echo '快速安装nginx\php\google-brr
+使用脚本前请先使用ready参数来安装脚本的依赖
+
+安装nginx和php的格式：install_nginx_php_bbr.sh {nginx|php} [version] [g]
+	version指定安装的版本，默认安装版本为nginx-1.14.2，php-7.2.16
+	支持的版本可以到项目目录下查看
+
+安装google-bbr：需要先升级内核，然后安装bbr
+	升级内核使用kerup参数，升级完成后需要手动指定版本并重启
+		egrep ^menuentry /etc/grub2.cfg | cut -f 2 -d	#查询现有的内核版本
+		grub2-set-default 位置		#位置从0开始
+	安装bbr：使用bbr参数，安装完成后需要重启
+'
+	elif [[ $1 == 'nginx' ]] || [[ $1 == 'php' ]] || [[ $1 == 'kerup' ]] || [[ $1 == 'bbr' ]];then $1;
+	elif [[ $1 == 'ready' ]];then ready
+	else echo "Wrong input"
 fi
